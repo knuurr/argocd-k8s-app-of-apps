@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: betanin-watcher-script
+  namespace: app-betanin
+data:
+  init-script.sh: |-
+    #!/bin/sh
+    apk update && apk upgrade
+    apk add --no-cache curl inotify-tools
+    
+    rm -rf /tmp/* /var/cache/apk/* 
+  entrypoint.sh: |-
+    #!/bin/sh
+    inotifywait -m -e create,moved_to --format '%w%f' "$WATCH_DIR" | while IFS= read -r dir_path; do
+        sleep 20s
+        response=$(curl --silent --output /dev/null --request POST --data-urlencode "both=$dir_path" --header "Accept: application/json"  --header "X-API-Key: $BETANIN_API_KEY" "$BETANIN_API_URL")
+        echo $response
+    done

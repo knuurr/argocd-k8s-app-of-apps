@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: betanin-script
+  namespace: app-betanin
+data:
+  init-script.sh: |-
+    pip install beets-bandcamp
+    
+    mkdir -p /opt/plugin/beets-alternatives/beetsplug
+    cd /opt/plugin/beets-alternatives/beetsplug
+    
+    wget -O __init__.py https://raw.githubusercontent.com/geigerzaehler/beets-alternatives/main/beetsplug/__init__.py
+    wget -O alternatives.py https://raw.githubusercontent.com/geigerzaehler/beets-alternatives/main/beetsplug/alternatives.py

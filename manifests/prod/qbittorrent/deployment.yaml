@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbittorrent-deployment
+  namespace: app-qbittorrent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qbittorrent
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+    spec:
+      # securityContext:
+      #   runAsUser: 2000
+      #   runAsGroup: 2000
+      #   fsGroup: 2000
+      containers:
+      - name: qbittorrent
+        image: lscr.io/linuxserver/qbittorrent:4.6.3-libtorrentv1
+        ports:
+          - containerPort: 8080
+            protocol: TCP
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+        # env:
+        # - name: PUID
+        #   value: "2000"
+        # - name: PGID
+        #   value: "2000"
+        # - name: TZ
+        #   value: "Europe/Warsaw"
+        # - name: WEBUI_PORT
+        #   value: "8080"
+        # # VueTorrent support
+        # - name: DOCKER_MODS
+        #   value: "arafatamim/linuxserver-io-mod-vuetorrent"
+        envFrom:
+        - configMapRef:
+            name: qbittorrent-env-configmap
+
+        volumeMounts:
+        # Host timezone + localtime
+        - name: localtime
+          mountPath: /etc/localtime
+          readOnly: true
+        - name: timezone
+          mountPath: /etc/timezone
+          readOnly: true
+        # App specific mounts
+        - name: qbittorrent-config
+          mountPath: /config
+        - name: qbittorrent-downloads
+          mountPath: /downloads
+        # - name: qbittorrent-music
+        #   mountPath: /music/_staging
+        # - name: done-sh
+        #   mountPath: /opt/done.sh
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+          type: File
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: File
+      - name: qbittorrent-config
+        hostPath:
+          path: /opt/configs/qbittorrent  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      - name: qbittorrent-downloads
+        hostPath:
+          path: /opt/other/qb-00download  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      # - name: qbittorrent-music
+      #   hostPath:
+      #     path: /mnt/myhdd/00music/library/_staging  # Adjust the path accordingly
+      # - name: done-sh
+      #   hostPath:
+      #     path: ./config/done.sh  # Adjust the path accordingly
+  # restartPolicy: Always

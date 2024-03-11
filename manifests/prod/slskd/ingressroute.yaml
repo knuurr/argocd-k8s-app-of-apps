@@ -1,0 +1,17 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: slskd-ingressroute
+  namespace: app-slskd
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`slskd.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: slskd-service
+          port: 80

@@ -1,0 +1,39 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: syncthing-ingressroute
+  namespace: app-syncthing
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`syncthing.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: syncthing-service
+          port: 80
+    # Untested
+    # - match: Host(`sync.syncthing.xxxxxx.org`)
+    #   kind: Rule
+    #   services:
+    #     - name: syncthing-tcp-service
+    #       port: 22000
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: syncthing-ingressroute
+  namespace: app-syncthing
+spec:
+  entryPoints:
+    - web
+  routes:
+    # Untested
+    - match: Host(`sync.syncthing.yourdomain.org`)
+      kind: Rule
+      services:
+        - name: syncthing-tcp-service
+          port: 22000

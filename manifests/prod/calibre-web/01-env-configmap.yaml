@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: calibre-web-env-configmap
+  namespace: app-calibre-web
+data:
+  PUID: "2000"
+  PGID: "2000"
+  TZ: "Europe/Warsaw"
+  DOCKER_MODS: "linuxserver/mods:universal-calibre"
+  OAUTHLIB_RELAX_TOKEN_SCOPE: "1"

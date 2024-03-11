@@ -1,0 +1,18 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: error-pages-ingressroute
+  namespace: error-pages-namespace
+spec:
+  entryPoints:
+    - websecure
+    - web
+  routes:
+  - match: HostRegexp(`{host:.+}`)
+    kind: Rule
+    priority: 1
+    services:
+    - name: error-pages-service
+      port: 80
+    middlewares:
+      - name: error-pages-middleware

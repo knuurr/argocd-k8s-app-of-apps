@@ -1,0 +1,28 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: gatus-ingressroute
+  namespace: app-gatus
+  labels:
+    app.kubernetes.io/name: gatus
+  annotations:
+    # https://gethomepage.dev/latest/configs/kubernetes/#traefik-ingressroute-support
+    # href is REALLY FUCKING REQUIRED HERE!!! Or won't work.
+    gethomepage.dev/href: "https://gatus.yourdomain.org"
+    gethomepage.dev/description: Open-source document management system that transforms your physical documents into a searchable online archive
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Next Group
+    gethomepage.dev/icon: gatus.png
+    gethomepage.dev/name: gatus
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`gatus.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: svc-gatus
+          port: 80

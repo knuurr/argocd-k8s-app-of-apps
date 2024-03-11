@@ -1,0 +1,28 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: betanin-ingressroute
+  namespace: app-betanin
+  labels:
+    app.kubernetes.io/name: betanin
+  annotations:
+    # https://gethomepage.dev/latest/configs/kubernetes/#traefik-ingressroute-support
+    # href is REALLY REQUIRED HERE!!! Or won't work.
+    gethomepage.dev/href: "https://betanin.yourdomain.org"
+    gethomepage.dev/description: Beets based mitm of your torrent client and music player
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: My Third Group
+    gethomepage.dev/icon: betanin.png
+    gethomepage.dev/name: Betanin
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`betanin.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: betanin-service
+          port: 80

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jellyfin-env-configmap
+  namespace: app-jellyfin
+data:
+  PUID: "2000"
+  PGID: "2000"
+  TZ: "Europe/Warsaw"
+  JELLYFIN_PublishedServerUrl: "http://jellyfin.yourdomain.org"

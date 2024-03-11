@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authelia
+  namespace: app-authelia
+  labels:
+    app: authelia
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authelia
+  template:
+    metadata:
+      labels:
+        app: authelia
+    spec:
+      containers:
+      - name: authelia
+        image: authelia/authelia:4.37.5 #  <----- You should use an explicit version here docker pull 
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9091
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+        - name: dbvolume
+          mountPath: /var/lib/authelia
+      volumes:
+      - name: dbvolume
+        emptyDir:
+          {}
+      - name: config-volume
+        configMap:
+          name: authelia-config
+          items:
+          - key: configuration.yml
+            path: configuration.yml
+          - key: users.yaml
+            path: users.yaml
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authelia-service
+  namespace: app-authelia
+spec:
+  selector:
+    app: authelia
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9091
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: authelia-ingressroute
+  namespace: app-authelia
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`auth.yourdomain.org`)
+      kind: Rule
+      services:
+        - name: authelia-service
+          port: 80

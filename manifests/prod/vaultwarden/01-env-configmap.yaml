@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vaultwarden-env-configmap
+  namespace: app-vaultwarden
+data:
+  WEBSOCKET_ENABLED: "true"
+  INVITATIONS_ALLOWED: "false"
+  DOMAIN: "https://vaultwarden.yourdomain.org"
+  LOGIN_RATELIMIT_MAX_BURST: "10"
+  LOGIN_RATELIMIT_SECONDS: "60"
+  ADMIN_RATELIMIT_MAX_BURST: "10"
+  ADMIN_RATELIMIT_SECONDS: "60"
+  SENDS_ALLOWED: "false"

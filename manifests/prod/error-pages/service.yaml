@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: error-pages-service
+  namespace: error-pages-namespace
+spec:
+  selector:
+    app: error-pages
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: ClusterIP

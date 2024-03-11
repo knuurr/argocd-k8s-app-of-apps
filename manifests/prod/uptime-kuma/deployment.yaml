@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uptime-kuma-deployment
+  namespace: app-uptime-kuma
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uptime-kuma
+  template:
+    metadata:
+      labels:
+        app: uptime-kuma
+    spec:
+      # securityContext:
+      #   runAsUser: 2000
+      #   runAsGroup: 2000
+      #   fsGroup: 2000
+      containers:
+      - name: uptime-kuma
+        image: louislam/uptime-kuma:1.23.11
+        ports:
+          - containerPort: 3001
+            protocol: TCP
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        volumeMounts:
+        - name: localtime
+          mountPath: /etc/localtime
+          readOnly: true
+        - name: timezone
+          mountPath: /etc/timezone
+          readOnly: true
+        - name: uptime-kuma-data
+          mountPath: /app/data
+        # Med to recheck
+        # - name: docker-socket
+        #   mountPath: /var/run/docker.sock
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+      - name: uptime-kuma-data
+        hostPath:
+          path: /opt/configs/uptime-kuma
+          type: DirectoryOrCreate
+        # Need to recheck
+      # - name: docker-socket
+      #   hostPath:
+      #     path: /var/run/docker.sock

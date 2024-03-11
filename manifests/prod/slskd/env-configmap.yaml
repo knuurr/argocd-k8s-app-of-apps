@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: slskd-env-configmap
+  namespace: app-slskd
+data:
+  SLSKD_REMOTE_CONFIGURATION: "false"

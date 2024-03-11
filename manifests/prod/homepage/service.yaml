@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-homepage
+  namespace: app-homepage
+  labels:
+    app.kubernetes.io/name: homepage
+  # annotations:
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      # name: homepage
+  selector:
+    app.kubernetes.io/name: homepage

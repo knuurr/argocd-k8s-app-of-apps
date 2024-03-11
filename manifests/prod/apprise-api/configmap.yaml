@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apprise-api-config
+  namespace: app-apprise-api
+data:
+  config.yml: |
+    # Reference:
+    # https://github.com/caronc/apprise/wiki/config_yaml
+
+    # if no version is specified then version 1 is presumed. Thus this is a
+    # completely optional field. It's a good idea to just add this line because it
+    # will help with future ambiguity (if it ever occurs).
+    version: 1
+
+    # Define your URLs
+    urls:
+      # Betanin app
+      - ntfy://ntfy:80/betanin-ppEaYrA:
+        - tag: betanin
+      
+      # Qbittorrent
+      - ntfy://ntfy:80/qb-unDR5r1r:
+        - tag: torrent
+
+      # Uptime-Kuma
+      - ntfy://ntfy:80/uptime-kuma-izGtqbOiR:
+        - tag: uptime-kuma
+
+      # Backup
+      - ntfy://ntfy:80/backup-QiFZzJMq:
+        - tag: backup
+
+      # Watchtower
+      - ntfy://ntfy:80/watchtower-k8YXmETN:
+        - tag: watchtower
+
+      # Telegram
+      # - ntfy://ntfy:80/changeme:
+      #   - tag: telegram
+      
+
+      # A colon grants you customization; the below associates another tag
+      # with our URL. This means it will have admin, devops and customer:
+      # - xml://localhost:
+      #   - tag: customer

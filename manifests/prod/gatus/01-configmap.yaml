@@ -1,0 +1,175 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: gatus
+    app.kubernetes.io/name: gatus
+  name: gatus-config
+  namespace: app-gatus
+data:
+  config.yaml: |-
+    # alerting:
+    #   slack:
+    #     webhook-url: "https://hooks.slack.com/services/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"
+    #     default-alert:
+    #       enabled: true
+    #       description: "Health check failed"
+    #       send-on-resolved: true
+    #       failure-threshold: 3
+    #       success-threshold: 2
+
+    endpoints:
+    - name: SSL check
+      group: ssl/tls
+      url: https://auth.yourdomain.org
+      interval: 10m
+      conditions:
+        - "[CERTIFICATE_EXPIRATION] > 240h"
+
+    - name: authelia
+      group: core
+      url: http://authelia-service.app-authelia.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
+
+    - name: uptime-kuma
+      group: core
+      url: http://uptime-kuma-service.app-uptime-kuma.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
+
+    - name: prometheus-grafana
+      group: core
+      url: http://prometheus-grafana.monitoring.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
+
+    - name: flaresolverr
+      group: app-core
+      url: http://flaresolverr-service.app-flaresolverr.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
+
+    # - name: metrics-server
+    #   group: kube-core
+    #   url: http://metrics-server.kube-system.svc.cluster.local
+    #   interval: 30s
+    #   conditions:
+    #     - "[STATUS] == 200"
+    #     - "[RESPONSE_TIME] < 1000"
+
+    # Unknown issue
+    - name: n8n
+      group: app-core
+      url: http://n8n-service.app-n8n.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
+
+    - name: syncthing
+      group: app-core
+      url: http://syncthing-service.app-syncthing.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
+
+    - name: jellyfin
+      group: app-core
+      url: http://jellyfin-service.app-jellyfin.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
+
+    # No sens to monitor this one
+    # - name: error-pages
+    #   group: error-pages-core
+    #   url: http://error-pages-service.error-pages-namespace.svc.cluster.local
+    #   interval: 30s
+    #   conditions:
+    #     - "[STATUS] == 200"
+    #     - "[RESPONSE_TIME] < 1000"
+
+    # Check ClusterIP port
+    - name: qbittorrent
+      group: app-core
+      url: http://qbittorrent-service.app-qbittorrent.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
+
+    - name: vaultwarden
+      group: app-core
+      url: http://vaultwarden-service.app-vaultwarden.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
+
+    - name: audiobookshelf
+      group: app-core
+      url: http://audiobookshelf-service.app-audiobookshelf.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
+
+    - name: homepage
+      group: app-core
+      url: http://homepage.app-homepage.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
+
+    - name: paperless-ngx
+      group: app-paperless-core
+      url: http://paperless-ngx-service.app-paperless-ngx.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
+
+    - name: calibre-web
+      group: app-calibre-core
+      url: http://calibre-web-service.app-calibre-web.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
+
+    - name: slskd
+      group: app-core
+      url: http://slskd-service.app-slskd.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
+
+    - name: tdarr
+      group: app-core
+      url: http://tdarr-service.app-tdarr.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
+
+    # Add redirect support
+    - name: jackett
+      group: app-core
+      url: http://jackett-service.app-jackett.svc.cluster.local
+      interval: 30s
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"

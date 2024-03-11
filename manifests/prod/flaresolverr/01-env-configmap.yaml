@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flaresolverr-env-configmap
+  namespace: app-flaresolverr
+data:
+  LOG_LEVEL: "info"
+  LOG_HTML: "false"
+  CAPTCHA_SOLVER: "none"
+  TZ: "Europe/Warsaw"

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jdownloader-env-configmap
+  namespace: app-jdownloader
+data:
+  KEEP_APP_RUNNING: "1"
+  DARK_MODE: "1"
+  USER_ID: "2000"
+  GROUP_ID: "2000"

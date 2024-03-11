@@ -1,0 +1,60 @@
+# https://citizix.com/how-to-install-and-run-gatus-for-health-check-monitoring-in-kubernetes/
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gatus
+  labels:
+    app: gatus
+  namespace: app-gatus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gatus
+  template:
+    metadata:
+      labels:
+        app: gatus
+    spec:
+      containers:
+      - name: gatus
+        image: twinproduction/gatus:latest
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        volumeMounts:
+        # Host timezone + localtime
+        - name: localtime
+          mountPath: /etc/localtime
+          readOnly: true
+        - name: timezone
+          mountPath: /etc/timezone
+          readOnly: true
+        # App specific mounts
+        - name: gatus-config
+          mountPath: /config
+        - name: gatus-data
+          mountPath: /data
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+          type: File
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: File
+      - name: gatus-config
+        configMap:
+          defaultMode: 420
+          name: gatus-config
+      - name: gatus-data
+        hostPath:
+          path: /opt/configs/gatus  # Adjust the path accordingly
+          type: DirectoryOrCreate

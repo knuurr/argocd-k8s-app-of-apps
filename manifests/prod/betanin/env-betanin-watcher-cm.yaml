@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: betanin-watcher-env-cm
+  namespace: app-betanin
+data:
+  UMASK_SET: "022"
+  BETANIN_API_KEY: "2000"
+  BETANIN_API_URL: "http://betanin:${PORT}/api/torrents"
+  WATCH_DIR: "/music/_staging"

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: error-pages-deployment
+  namespace: error-pages-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: error-pages
+  template:
+    metadata:
+      labels:
+        app: error-pages
+    spec:
+      containers:
+      - name: error-pages
+        image: tarampampam/error-pages:latest
+        env:
+          - name: TEMPLATE_NAME
+            value: hacker-terminal
+        ports:
+        - containerPort: 8080

@@ -1,0 +1,42 @@
+# ---
+# apiVersion: traefik.containo.us/v1alpha1
+# kind: IngressRoute
+# metadata:
+#   name: kube-prometheus-ingress
+#   namespace: default
+# spec:
+#   entryPoints:
+#     - websecure
+#     # - web
+#   routes:
+#     - match: Host(`my.host.com`)
+#       kind: Rule
+#       middlewares:
+#         - name: auth-middleware
+#           namespace: kube-system
+#       services:
+#       - name: default-kube-prometheus-st-prometheus
+#         port: 9090
+  # tls:
+  #   certResolver: le
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: grafana-ingress
+  namespace: monitoring
+  # annotations: 
+  #   kubernetes.io/ingress.class: traefik-internal 
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`grafana.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: prometheus-grafana
+          port: 80

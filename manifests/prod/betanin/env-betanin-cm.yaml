@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: betanin-env-cm
+  namespace: app-betanin
+data:
+  UID: "2000"
+  GID: "2000"

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ntfy-deployment
+  namespace: app-ntfy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ntfy
+  template:
+    metadata:
+      labels:
+        app: ntfy
+    spec:
+      securityContext:
+        runAsUser: 2000
+        runAsGroup: 2000
+        fsGroup: 2000
+      containers:
+      - name: ntfy
+        image: binwiederhier/ntfy
+        command:
+          - serve
+        volumeMounts:
+        - name: ntfy-cache
+          mountPath: /var/cache/ntfy
+        - name: ntfy-etc
+          mountPath: /etc/ntfy
+      volumes:
+      - name: ntfy-cache
+        hostPath:
+          path: ${DATA}/ntfy/cache  # Adjust the path accordingly
+      - name: ntfy-etc
+        hostPath:
+          path: ${DATA}/ntfy/etc  # Adjust the path accordingly
+  # restartPolicy: Always

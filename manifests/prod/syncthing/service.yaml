@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: syncthing-service
+  namespace: app-syncthing
+spec:
+  selector:
+    app: syncthing
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: webui
+  type: ClusterIP
+---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: syncthing-service-nodeport
+#   namespace: app-syncthing
+# spec:
+#   selector:
+#         app: syncthing
+#   ports:
+#   - name: tcp22000
+#     protocol: TCP
+#     port: 22000
+#     targetPort: 22000
+#     nodePort: 32000  # Specify a NodePort in the high range (adjust as needed)
+#   - name: udp22000
+#     protocol: UDP
+#     port: 22000
+#     targetPort: 22000
+#     nodePort: 32001  # Specify a different NodePort for UDP
+#   type: NodePort
+
+# Untested
+apiVersion: v1
+kind: Service
+metadata:
+  name: syncthing-tcp-service
+  namespace: app-syncthing
+spec:
+  selector:
+    app: syncthing
+  ports:
+  - name: tcp22000
+    protocol: TCP
+    port: 22000
+    targetPort: 22000
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: syncthing-tcp-ingressroute
+  namespace: app-syncthing
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: HostSNI(`*`)
+      kind: Rule
+      services:
+        - name: syncthing-tcp-service
+          port: 22000

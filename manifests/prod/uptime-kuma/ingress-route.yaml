@@ -1,0 +1,17 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: uptime-kuma-ingressroute
+  namespace: app-uptime-kuma
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`uptime-kuma.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: uptime-kuma-service
+          port: 80

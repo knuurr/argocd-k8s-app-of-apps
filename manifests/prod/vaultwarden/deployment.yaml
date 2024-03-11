@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vaultwarden-deployment
+  namespace: app-vaultwarden
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vaultwarden
+  template:
+    metadata:
+      labels:
+        app: vaultwarden
+    spec:
+      # securityContext:
+      #   runAsUser: 2000
+      #   runAsGroup: 2000
+      #   fsGroup: 2000
+      containers:
+      - name: vaultwarden
+        image: vaultwarden/server:latest
+        # env:
+        #   - name: WEBSOCKET_ENABLED
+        #     value: "true"
+        #   - name: INVITATIONS_ALLOWED
+        #     value: "false"
+        #   - name: DOMAIN
+        #     value: "https://vaultwarden.xxxxxxxx.duckdns.org"
+        #   - name: LOGIN_RATELIMIT_MAX_BURST
+        #     value: "10"
+        #   - name: LOGIN_RATELIMIT_SECONDS
+        #     value: "60"
+        #   - name: ADMIN_RATELIMIT_MAX_BURST
+        #     value: "10"
+        #   - name: ADMIN_RATELIMIT_SECONDS
+        #     value: "60"
+        #   - name: ADMIN_TOKEN
+        #     value: "heregoestoken"
+        #   - name: SENDS_ALLOWED
+        #     value: "false"
+        envFrom:
+        - configMapRef:
+            name: vaultwarden-env-configmap
+
+        env:
+        - name: ADMIN_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: vaultwarden-secret
+              key: ADMIN_TOKEN
+
+        ports:
+          - name: webui
+            containerPort: 80
+          - name: websocket
+            containerPort: 3012
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        volumeMounts:
+          # Host timezone + localtime
+          - name: localtime
+            mountPath: /etc/localtime
+            readOnly: true
+          - name: timezone
+            mountPath: /etc/timezone
+            readOnly: true
+          # App specific mounts
+          - name: vaultwarden-data
+            mountPath: /data
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+          type: File
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: File
+      - name: vaultwarden-data
+        hostPath:
+          path: /opt/configs/vaultwarden  # Adjust the path accordingly
+          type: DirectoryOrCreate

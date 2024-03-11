@@ -1,0 +1,17 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: jdownloader-2-ingressroute
+  namespace: app-jdownloader
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`jdownloader.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: jdownloader-2-service
+          port: 80  # Replace <PORT> with the actual port you want to use

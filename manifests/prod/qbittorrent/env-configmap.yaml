@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qbittorrent-env-configmap
+  namespace: app-qbittorrent
+data:
+  PUID: "2000"
+  PGID: "2000"
+  TZ: "Europe/Warsaw"
+  WEBUI_PORT: "8080"
+  DOCKER_MODS: "arafatamim/linuxserver-io-mod-vuetorrent"

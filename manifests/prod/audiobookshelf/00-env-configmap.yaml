@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: audiobookshelf-env-configmap
+  namespace: app-audiobookshelf
+data:
+  user: "2000:2000"

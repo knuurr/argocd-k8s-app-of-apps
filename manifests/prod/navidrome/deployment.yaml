@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: navidrome-deployment
+  namespace: app-navidrome
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: navidrome
+  template:
+    metadata:
+      labels:
+        app: navidrome
+    spec:
+      containers:
+      - name: navidrome
+        image: deluan/navidrome:latest
+        env:
+        - name: ND_SCANSCHEDULE
+          value: "1h"
+        - name: ND_LOGLEVEL
+          value: "info"
+        # - name: ND_BASEURL
+        #   value: ""
+        volumeMounts:
+        - name: navidrome-data
+          mountPath: /data
+        - name: navidrome-music 
+          mountPath: /music # Is this accurate
+      volumes:
+      - name: navidrome-data
+        hostPath:
+          path: /opt/navidrome  # Adjust the path accordingly
+      - name: navidrome-music
+        hostPath:
+          path: /mnt/myhdd/Muzyka  # Adjust the path accordingly
+  # restartPolicy: Always

@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calibre-web-deployment
+  namespace: app-calibre-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: calibre-web
+  template:
+    metadata:
+      labels:
+        app: calibre-web
+    spec:
+      # securityContext:
+      #   runAsUser: 2000
+      #   runAsGroup: 2000
+      #   fsGroup: 2000
+      containers:
+      - name: calibre-web
+        image: lscr.io/linuxserver/calibre-web:0.6.21-ls254
+        ports:
+          - containerPort: 8083
+            protocol: TCP
+        resources:
+          limits:
+            cpu: 400m
+            memory: 512Mi
+        # env:
+        # - name: PUID
+        #   value: "2000"
+        # - name: PGID
+        #   value: "2000"
+        # - name: TZ
+        #   value: "Etc/UTC"
+        # - name: DOCKER_MODS
+        #   value: "linuxserver/mods:universal-calibre"
+        # - name: OAUTHLIB_RELAX_TOKEN_SCOPE
+        #   value: "1"
+        envFrom:
+        - configMapRef:
+            name: calibre-web-env-configmap
+        volumeMounts:
+        # Host timezone + localtime
+        - name: localtime
+          mountPath: /etc/localtime
+          readOnly: true
+        - name: timezone
+          mountPath: /etc/timezone
+          readOnly: true
+        # App specific mounts
+        - name: calibre-web-config
+          mountPath: /config
+        # - name: calibre-web-books
+        #   mountPath: /books
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+          type: File
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: File
+      - name: calibre-web-config
+        # configMap:
+        hostPath:
+          path: /opt/configs/calibre-web/config  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      # - name: calibre-web-books
+      #   hostPath:
+      #     path: /path/to/your/books-directory  # Adjust the path accordingly
+  # restartPolicy: Always

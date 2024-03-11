@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jdownloader-2-service
+  namespace: app-jdownloader
+spec:
+  selector:
+    app: jdownloader-2
+  ports:
+  - protocol: TCP
+    port: 80  # Replace <PORT> with the actual port you want to use
+    targetPort: 5800 # Replace <PORT> with the actual port you want to use
+  type: ClusterIP

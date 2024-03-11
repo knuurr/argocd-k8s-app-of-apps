@@ -1,0 +1,17 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: jackett-ingressroute
+  namespace: app-jackett
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`jackett.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: jackett-service
+          port: 80

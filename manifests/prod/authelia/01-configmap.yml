@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authelia-config
+  namespace: app-authelia
+data:
+  configuration.yml: |-
+    server:
+      host: 0.0.0.0
+      port: 9091
+    log:
+      level: debug
+    
+    theme: dark
+    # This secret can also be set using the env variables AUTHELIA_JWT_SECRET_FILE
+    jwt_secret: super-duper-secret-lol
+    authentication_backend:
+      # disable_reset_password: true
+      password_reset:
+        disable: false
+      file:
+        path: '/config/users.yaml'
+        # watch: false
+        password:
+          # Recommended Parameters: Argon2 #
+          # https://www.authelia.com/reference/guides/passwords/#recommended-parameters-argon2
+          algorithm: 'argon2id'
+          # variant: 'argon2id'
+          iterations: 3
+          memory: 65536
+          parallelism: 4
+          key_length: 32
+          salt_length: 16
+    access_control:
+      # More: https://www.authelia.com/configuration/security/access-control/#policies
+      default_policy: one_factor # default: deny
+      rules:
+          - domain: vault.yourdomain.org
+            # resources:
+            #   - "^/api.*$"
+            #   - "^/notifications.*$"
+            policy: bypass
+          - domain: api.yourdomain.org
+            policy: bypass
+          - domain: calibre.yourdomain.org
+            # For OPDS catalog
+            resources:
+              - "^/opds.*$"
+            policy: bypass
+    session:
+      name: authelia_session
+      # This secret can also be set using the env variables AUTHELIA_SESSION_SECRET_FILE
+      secret: unsecure_session_secret
+      expiration: 3600  # 1 hour
+      # expiration: 5184000 # 60 mins * 24h * 60 days = ~2 months
+      inactivity: 300  # 5 minutes
+      domain: yourdomain.org # Should match whatever your root protected domain is
+      remember_me_duration: 2M
+    regulation:
+      max_retries: 3
+      find_time: 120
+      ban_time: 300
+    storage:
+      encryption_key: a_very_important_secret # Now required
+      local:
+        path: /var/lib/authelia/db.sqlite3
+    notifier:
+      filesystem:
+        filename: /var/lib/authelia/notification.txt
+  users.yaml: |-
+    users:
+      # Kept for debugging purposes
+      authelia:
+        displayname: "Authelia User"
+        disabled: true
+        # !!! user:pwd = authelia:authelia !!!
+        password: "$6$rounds=50000$BpLnfgDsc2WD8F2q$Zis.ixdg9s/UOJYrs56b5QEZFiZECu0qZVNsIYxBaNJ7ucIL.nlxVCT5tqh8KHG8X4tlwCFm5r6NTOZZ5qRFN/"  # yamllint disable-line rule:line-length
+        email: kek@lol.com
+        groups:
+          - admins
+          - dev
+      qbus:
+        displayname: "Kubuś Migoś"
+        disabled: false
+        # Password is Authelia
+        # How to generate new:
+        # docker run authelia/authelia:latest authelia crypto hash generate argon2 --password 'password' 
+        # pwd: kek
+        password: "$argon2id$v=19$m=65536,t=3,p=4$Js6WaRh83gWb4TnTGUG0yg$v8rBZGyCmGUFGvfSC6AIsbKGpj3gxGQDj3BSu4i7ZKs"  # yamllint disable-line rule:line-length
+        email: kek@lol.com
+        groups:
+          - admins
+          - dev
+      
+    ...

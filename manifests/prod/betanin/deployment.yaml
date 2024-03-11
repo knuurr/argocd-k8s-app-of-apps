@@ -1,0 +1,153 @@
+# I need ot translate this:
+      # dockerfile_inline: |
+      #   FROM sentriz/betanin:v0.5.6
+      #   RUN pip install beets-bandcamp
+      #   RUN mkdir -p /opt/plugin/beets-alternatives/beetsplug \
+      #       && cd /opt/plugin/beets-alternatives/beetsplug \
+      #       && wget -O __init__.py https://raw.githubusercontent.com/geigerzaehler/beets-alternatives/main/beetsplug/__init__.py \
+      #       && wget -O alternatives.py https://raw.githubusercontent.com/geigerzaehler/beets-alternatives/main/beetsplug/alternatives.py
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: betanin-deployment
+  namespace: app-betanin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: betanin
+  template:
+    metadata:
+      labels:
+        app: betanin
+    spec:
+      # securityContext:
+      #   runAsUser: 2000
+      #   runAsGroup: 2000
+      #   fsGroup: 2000
+      containers:
+      - name: betanin
+        image: sentriz/betanin:v0.5.6
+        # env:
+        #   - name: UID
+        #     value: "2000"
+        #   - name: GID
+        #     value: "2000"
+        envFrom:
+        - configMapRef:
+            name: betanin-env-cm
+        volumeMounts:
+        - name: init-script-volume
+          mountPath: /init-script.sh
+          subPath: init-script.sh
+        - name: betanin-data
+          mountPath: /b/.local/share/betanin/
+        - name: betanin-config
+          mountPath: /b/.config/betanin/
+        - name: beets-config
+          mountPath: /b/.config/beets/
+        - name: music-library
+          mountPath: /music
+        command: ["/bin/sh"]
+        args: 
+          - "-c"
+          - "/init-script.sh && exec /src/docker-entry"
+
+      volumes:
+      - name: betanin-data
+        hostPath:
+          path: /opt/configs/betanin/data  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      - name: betanin-config
+        hostPath:
+          path: /opt/configs/betanin/config  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      - name: beets-config
+        hostPath:
+          path: /opt/configs/beets/config  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      - name: music-library
+        hostPath:
+          path: /opt/other/beets/music-library  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      - name: init-script-volume
+        configMap:
+          # https://stackoverflow.com/questions/52254980/bash-script-mounted-as-configmap-with-777-permissions-cannot-be-ran
+          defaultMode: 0777
+          name: betanin-script
+          items:
+            - key: init-script.sh
+              path: init-script.sh
+  # restartPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: betanin-watcher-deployment
+  namespace: app-betanin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: betanin-watcher
+  template:
+    metadata:
+      labels:
+        app: betanin-watcher
+    spec:
+      containers:
+      - name: betanin-watcher
+        image: alpine:3.19
+        # env:
+        # - name: UMASK_SET
+        #   value: "022"
+        # - name: BETANIN_API_KEY
+        #   value: "<your-betanin-api-key>"
+        # - name: BETANIN_API_URL
+        #   value: "http://betanin:${PORT}/api/torrents"
+        # - name: WATCH_DIR
+        #   value: "/music/_staging"
+        envFrom:
+        - configMapRef:
+            name: betanin-watcher-env-cm
+        volumeMounts:
+        - name: init-script-volume
+          mountPath: /init-script.sh
+          subPath: init-script.sh
+        - name: entrypoint-volume
+          mountPath: /entrypoint.sh
+          subPath: entrypoint.sh
+        - name: music-staging
+          mountPath: /music/_staging
+          readOnly: true
+        resources:
+          limits:
+            cpu: '100m'
+            memory: '100Mi'
+        command: ["/bin/sh"]
+        args: 
+          - "-c"
+          - "/init-script.sh && exec /entrypoint.sh"
+      volumes:
+      - name: music-staging
+        hostPath:
+          path: /opt/other/beets/music-library  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      - name: init-script-volume
+        configMap:
+          # https://stackoverflow.com/questions/52254980/bash-script-mounted-as-configmap-with-777-permissions-cannot-be-ran
+          defaultMode: 0777
+          name: betanin-watcher-script
+          items:
+            - key: init-script.sh
+              path: init-script.sh
+      - name: entrypoint-volume
+        configMap:
+          # https://stackoverflow.com/questions/52254980/bash-script-mounted-as-configmap-with-777-permissions-cannot-be-ran
+          defaultMode: 0777
+          name: betanin-watcher-script
+          items:
+            - key: entrypoint.sh
+              path: entrypoint.sh

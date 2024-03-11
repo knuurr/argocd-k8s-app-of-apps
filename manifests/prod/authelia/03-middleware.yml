@@ -1,0 +1,15 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: auth-middleware
+  namespace: kube-system
+spec:
+  forwardAuth:
+    address: http://authelia-service.app-authelia.svc/api/verify?rd=https://auth.yourdomain.org
+    authResponseHeaders:
+      - Remote-User
+      - Remote-Name
+      - Remote-Email
+      - Remote-Groups
+...

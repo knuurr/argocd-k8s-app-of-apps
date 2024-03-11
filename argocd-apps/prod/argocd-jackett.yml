@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: jackett
+  namespace: argocd
+  finalizers:
+    # The default behaviour is foreground cascading deletion
+    - resources-finalizer.argocd.argoproj.io
+
+
+spec:
+  project: default
+  # https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/
+  # Single source
+  source:
+      repoURL: git@github.com:knuurr/gitops-test.git
+      path: manifests/prod/jackett
+      targetRevision: main
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: app-jackett
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true

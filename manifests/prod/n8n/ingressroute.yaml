@@ -1,0 +1,28 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: n8n-ingressroute
+  namespace: app-n8n
+  labels:
+    app.kubernetes.io/name: app-n8n
+  annotations:
+    # https://gethomepage.dev/latest/configs/kubernetes/#traefik-ingressroute-support
+    # href is REALLY FUCKING REQUIRED HERE!!! Or won't work.
+    gethomepage.dev/href: "https://n8n.yourdomain.org"
+    gethomepage.dev/description: free and source-available workflow automation tool
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Next Group
+    gethomepage.dev/icon: n8n.png
+    gethomepage.dev/name: n8n
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`n8n.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: n8n-service
+          port: 80

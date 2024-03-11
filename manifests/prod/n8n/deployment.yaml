@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n-deployment
+  namespace: app-n8n
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: n8n
+  template:
+    metadata:
+      labels:
+        app: n8n
+    spec:
+      securityContext:
+      #   runAsUser: 2000
+      #   runAsGroup: 2000
+        fsGroup: 1000
+      containers:
+      - name: n8n
+        image: docker.n8n.io/n8nio/n8n:1.32.1
+        ports:
+          - containerPort: 5678
+            protocol: TCP
+        resources:
+          limits:
+            cpu: 400m
+            memory: 512Mi
+          requests:
+            cpu: 300m
+            memory: 300Mi
+        # env:
+        # - name: N8N_BASIC_AUTH_ACTIVE
+        #   value: "false"
+        # - name: GENERIC_TIMEZONE
+        #   value: "Europe/Warsaw"
+        envFrom:
+          - configMapRef:
+              name: n8n-env-configmap
+        volumeMounts:
+        # Host timezone + localtime
+        - name: localtime
+          mountPath: /etc/localtime
+          readOnly: true
+        - name: timezone
+          mountPath: /etc/timezone
+          readOnly: true
+        # App specific mounts
+        - name: n8n-config
+          mountPath: /home/node/.n8n
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+          type: File
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: File
+      - name: n8n-config
+        hostPath:
+          path: /opt/configs/n8n  # Adjust the path accordingly
+          type: DirectoryOrCreate
+

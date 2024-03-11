@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vaultwarden-service
+  namespace: app-vaultwarden
+spec:
+  selector:
+    app: vaultwarden
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: webui
+  type: ClusterIP # Keep ClusterIP for internal access
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vaultwarden-websocket
+  namespace: app-vaultwarden
+spec:
+  selector:
+    app: vaultwarden
+  ports:
+    - protocol: TCP
+      port: 3012
+      targetPort: websocket
+      nodePort: 30012 # Define the NodePort for WebSocket
+  type: NodePort # Expose WebSocket on a NodePort
+  

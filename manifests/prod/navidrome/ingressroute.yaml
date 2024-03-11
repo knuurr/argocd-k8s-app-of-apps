@@ -1,0 +1,17 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: navidrome-ingressroute
+  namespace: app-navidrome
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`navidrome.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: navidrome-service
+          port: 80

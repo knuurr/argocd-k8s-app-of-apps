@@ -1,0 +1,152 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: app-paperless-ngx
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperless-ngx-deployment
+  namespace: app-paperless-ngx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: paperless-ngx
+  template:
+    metadata:
+      labels:
+        app: paperless-ngx
+    spec:
+      containers:
+      - name: broker
+        image: docker.io/library/redis:7
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+      - name: webserver
+        image: ghcr.io/paperless-ngx/paperless-ngx:2.6.2
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: data
+          mountPath: /usr/src/paperless/data
+        - name: media
+          mountPath: /usr/src/paperless/media
+        - name: export
+          mountPath: /usr/src/paperless/export
+        - name: consume
+          mountPath: /usr/src/paperless/consume
+        envFrom:
+        - configMapRef:
+            name: paperless-ngx-config
+      - name: gotenberg
+        image: docker.io/gotenberg/gotenberg:8.2
+        ports:
+        - containerPort: 80
+        command:
+        - "gotenberg"
+        - "--chromium-disable-javascript=true"
+        - "--chromium-allow-list=file:///tmp/.*"
+      - name: tika
+        image: ghcr.io/paperless-ngx/tika:latest
+        ports:
+        - containerPort: 9998
+      volumes:
+      - name: data
+        hostPath:
+          path: /opt/configs/paperless/data  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      - name: redis-data
+        hostPath:
+          path: /opt/configs/paperless-redis/data  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      - name: media
+        hostPath:
+          path: /opt/configs/paperless/media  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      - name: export
+        hostPath:
+          path: /opt/others/paperless/export  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      - name: consume
+        hostPath:
+          path: /opt/others/paperless/consume  # Adjust the path accordingly
+          type: DirectoryOrCreate
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: paperless-ngx-service
+  namespace: app-paperless-ngx
+spec:
+  selector:
+    app: paperless-ngx
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000
+  type: ClusterIP
+
+---
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: paperless-ngx-ingressroute
+  namespace: app-paperless-ngx
+  labels:
+    app.kubernetes.io/name: paperless-ngx
+  annotations:
+    # https://gethomepage.dev/latest/configs/kubernetes/#traefik-ingressroute-support
+    # href is REALLY FUCKING REQUIRED HERE!!! Or won't work.
+    gethomepage.dev/href: "https://paperless.yourdomain.org"
+    gethomepage.dev/description: Open-source document management system that transforms your physical documents into a searchable online archive
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Next Group
+    gethomepage.dev/icon: paperless-ngx.png
+    gethomepage.dev/name: Paperless-ngx
+
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`paperless.yourdomain.org`)
+      kind: Rule
+      services:
+        - name: paperless-ngx-service
+          port: 80
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: paperless-ngx-config
+  namespace: app-paperless-ngx
+data:
+  PAPERLESS_REDIS: "redis://localhost:6379"
+  PAPERLESS_TIKA_ENABLED: "1"
+  PAPERLESS_TIKA_GOTENBERG_ENDPOINT: "http://localhost:80"  # Assuming Gotenberg runs on port 80
+  PAPERLESS_TIKA_ENDPOINT: "http://localhost:9998"
+  PAPERLESS_ADMIN_USER: "admin"
+  PAPERLESS_ADMIN_PASSWORD: "admin"
+  # My custom user
+  USERMAP_UID: "2000"
+  USERMAP_GID: "2000"
+  PAPERLESS_OCR_LANGUAGES: "eng pol"
+  PAPERLESS_TIME_ZONE: "Europe/Warsaw"
+  PAPERLESS_OCR_LANGUAGE: pol
+  # It REALLY needs http(s), bare root domain won't work.
+  PAPERLESS_URL: https://paperless.yourdomain.org
+  PAPERLESS_CONSUMER_RECURSIVE: "true"
+  PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: "true"
+
+
+
+

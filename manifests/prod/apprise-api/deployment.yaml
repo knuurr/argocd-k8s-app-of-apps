@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apprise-api-deployment
+  namespace: app-apprise-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apprise-api
+  template:
+    metadata:
+      labels:
+        app: apprise-api
+    spec:
+      containers:
+      - name: apprise-api
+        image: lscr.io/linuxserver/apprise-api:latest
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+      volumes:
+      - name: config-volume
+        configMap:
+          name: apprise-api-config
+  # restartPolicy: Always

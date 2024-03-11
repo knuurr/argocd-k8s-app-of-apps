@@ -1,0 +1,17 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: apprise-api-ingressroute
+  namespace: app-apprise-api
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`apprise-api.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: apprise-api-service
+          port: 80

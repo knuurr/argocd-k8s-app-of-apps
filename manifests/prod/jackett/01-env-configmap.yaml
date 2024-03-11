@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jackett-env-configmap
+  namespace: app-jackett
+data:
+  PUID: "2000"
+  PGID: "2000"
+  TZ: "Europe/Warsaw"

@@ -1,0 +1,17 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ntfy-ingressroute
+  namespace: app-ntfy
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`ntfy.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: ntfy-service
+          port: 80

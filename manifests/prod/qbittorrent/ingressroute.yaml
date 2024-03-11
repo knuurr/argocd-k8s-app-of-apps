@@ -1,0 +1,17 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: qbittorrent-ingressroute
+  namespace: app-qbittorrent
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`qbittorrent.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: qbittorrent-service
+          port: 80

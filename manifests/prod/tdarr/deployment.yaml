@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tdarr-deployment
+  namespace: app-tdarr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tdarr
+  template:
+    metadata:
+      labels:
+        app: tdarr
+    spec:
+      # securityContext:
+      #   runAsUser: 2000
+      #   runAsGroup: 2000
+      #   fsGroup: 2000
+      containers:
+      - name: tdarr
+        image: ghcr.io/haveagitgat/tdarr:latest
+        # env:
+        # - name: TZ
+        #   value: "Europe/Warsaw"
+        # - name: PUID
+        #   value: "2000"
+        # - name: PGID
+        #   value: "2000"
+        # - name: UMASK_SET
+        #   value: "002"
+        # - name: serverIP
+        #   value: "0.0.0.0"
+        # - name: serverPort
+        #   value: "8266"
+        # - name: webUIPort
+        #   value: "8265"
+        # - name: internalNode
+        #   value: "true"
+        # - name: inContainer
+        #   value: "true"
+        # - name: ffmpegVersion
+        #   value: "6"
+        # - name: nodeName
+        #   value: "MyInternalNode"
+        # - name: ROC_ENABLE_PRE_VEGA
+        #   value: "1"
+        envFrom:
+        - configMapRef:
+            name: tdarr-env-configmap
+
+        # resources:
+        #   limits:
+        #     cpus: 900mi
+        #     memory: 3072Mi
+        volumeMounts:
+        # Host timezone + localtime
+        - name: localtime
+          mountPath: /etc/localtime
+          readOnly: true
+        - name: timezone
+          mountPath: /etc/timezone
+          readOnly: true
+        # App specific mounts
+        - name: tdarr-app
+          mountPath: /app/server
+        - name: tdarr-configs
+          mountPath: /app/configs
+        - name: tdarr-logs
+          mountPath: /app/logs
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+          type: File
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: File
+      - name: tdarr-app
+        hostPath:
+          path: /opt/configs/tdarr/server
+          type: DirectoryOrCreate
+      - name: tdarr-configs
+        hostPath:
+          path: /opt/configs/tdarr/configs
+          type: DirectoryOrCreate
+      - name: tdarr-logs
+        hostPath:
+          path: /opt/configs/tdarr/logs
+          type: DirectoryOrCreate
+  # restartPolicy: Always

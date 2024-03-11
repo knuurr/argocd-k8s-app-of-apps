@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin-deployment
+  namespace: app-jellyfin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jellyfin
+  template:
+    metadata:
+      labels:
+        app: jellyfin
+    spec:
+      # securityContext:
+      #   runAsUser: 2000
+      #   runAsGroup: 2000
+      #   fsGroup: 2000
+      containers:
+      - name: jellyfin
+        image: lscr.io/linuxserver/jellyfin:latest
+        ports:
+          - containerPort: 8096
+            protocol: TCP
+        # resources:
+        #   limits:
+        #     cpu: 200m
+        #     memory: 512Mi
+        # env:
+        # - name: PUID
+        #   value: "2000"
+        # - name: PGID
+        #   value: "2000"
+        # - name: TZ
+        #   value: "Europe/Warsaw"
+        # - name: JELLYFIN_PublishedServerUrl
+        #   value: "http://jellyfin.yourdomain.org"  # Optional, adjust as needed
+        envFrom:
+        - configMapRef:
+            name: jellyfin-env-configmap
+
+        volumeMounts:
+        # Host timezone + localtime
+        - name: localtime
+          mountPath: /etc/localtime
+          readOnly: true
+        - name: timezone
+          mountPath: /etc/timezone
+          readOnly: true
+        # App specific mounts
+        - name: jellyfin-config
+          mountPath: /config
+        - name: jellyfin-music
+          mountPath: /data/music
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+          type: File
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: File
+      - name: jellyfin-config
+        hostPath:
+          path: /opt/configs/jellyfin-config  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      - name: jellyfin-music
+        hostPath:
+          path: /opt/other/Muzyka_DB2  # Adjust the path accordingly
+  # restartPolicy: UnlessStopped

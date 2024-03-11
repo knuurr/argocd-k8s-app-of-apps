@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: slskd-configmap
+  namespace: app-slskd
+data:
+  slskd.yml: |
+    # The application contains APIs for retrieving and updating the YAML configuration file. By default, this option is disabled. 
+    remote_configuration: false
+
+    # By default, incomplete and downloaded files are saved in APP_DIR/incomplete and APP_DIR/downloads directories, 
+    directories:
+      incomplete: /media/slskd/incomplete
+      downloads: /media/slskd/downloads
+
+    # Credentials to log in to the Soulseek network.
+
+    soulseek:
+      username: whemsoms
+      password: Iwanna!FuckU0yu
+      # The user description for the Soulseek network
+      # description: A slskd user. https://github.com/slskd/slskd
+
+    web:
+      authentication:
+        disabled: true
+        username: slskd
+        password: slskd
+        # By default, a random JWT secret key is generated at each start. 
+        # The JWT TTL option determines how long issued JWTs are valid, defaulting to 7 days.
+        # jwt: 
+        #   key: ~
+        #   ttl: 604800000
+        # api_keys:
+        #   my_api_key:
+        #     key: <some example string between 16 and 255 characters>
+        #     cidr: 0.0.0.0/0,::/0
+
+
+    global:
+      upload:
+        slots: 10
+        speed_limit: 100
+      download:
+        slots: 25
+        speed_limit: 100
+
+
+    # The port on which the application listens for incoming connections.
+    # soulseek:
+    #   listen_port: 50300
+
+        

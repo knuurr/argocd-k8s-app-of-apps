@@ -1,0 +1,62 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: homepage-ingress
+  namespace: app-homepage
+  labels:
+    app.kubernetes.io/name: homepage
+  annotations:
+    # https://gethomepage.dev/latest/configs/kubernetes/#traefik-ingressroute-support
+    # href is REALLY REQUIRED HERE!!! Or won't work.
+    gethomepage.dev/href: "https://yourdomain.org"
+    gethomepage.dev/description: Dynamically Detected Homepage
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: My Third Group
+    gethomepage.dev/icon: homepage.png
+    gethomepage.dev/name: Homepage
+
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`home.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: svc-homepage
+          port: 80
+
+# Untested
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-middleware
+  namespace: app-homepage
+spec:
+  redirectRegex:
+    regex: "^https://yourdomain.org/(.*)"
+    replacement: "https://home.yourdomain.org/$1"
+    permanent: true
+
+---
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: redirect-ingressroute
+  namespace: app-homepage
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: redirect-middleware
+          namespace: app-homepage
+      services:
+        - name: svc-homepage  # This service is a placeholder and will not be used for the redirect
+          port: 80

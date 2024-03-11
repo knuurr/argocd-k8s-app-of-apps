@@ -1,0 +1,24 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vaultwarden-ingressroute
+  namespace: app-vaultwarden
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`vaultwarden.yourdomain.org`)
+      kind: Rule
+      services:
+        - name: vaultwarden-service
+          port: 80
+      middlewares:
+      - name: auth-middleware
+        namespace: kube-system
+    - match: Host(`vaultwarden.yourdomain.org`) && PathPrefix(`/notifications`)
+      kind: Rule
+      # middlewares:
+      #   - name: bypass-authelia
+      services:
+        - name: vaultwarden-service
+          port: 80

@@ -1,0 +1,60 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    additionalArguments:
+      - --entrypoints.websecure.http.tls.certresolver=le
+      - --entrypoints.websecure.http.tls.domains[0].main=yourdomain.org
+      - --entrypoints.websecure.http.tls.domains[0].sans=*.yourdomain.org
+      - --certificatesresolvers.le.acme.dnschallenge.provider=duckdns
+      - --certificatesresolvers.le.acme.email=mail@example.org
+      - --certificatesresolvers.le.acme.dnschallenge.resolvers=1.1.1.1
+      - --certificatesresolvers.le.acme.storage=/data/acme.json
+      # allow traefik to reference resources (Middleware, ServerTransport...) 
+      # from other namespaces
+      - "--providers.kubernetescrd.allowCrossNamespace=true"
+
+    dashboard:
+      enabled: true
+    ports:
+      traefik:
+        expose: false # this is not recommended in production deployments, but I want to be able to see my dashboard locally
+      web:
+        redirectTo: 
+          port: websecure
+      # tls:
+      #   enabled: true
+      #   # this is the name of a TLSOption definition
+      #   options: ""
+      #   certResolver: "duckdns"
+      #   domains:
+      #     - main: 'yourdomain.org'
+      #       sans: '*.yourdomain.org'
+    certResolvers:
+      le:
+        email: mail@example.org
+        storage: "/data/acme.json"
+        caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+        dnsChallenge:
+          provider: duckdns
+          delayBeforeCheck: 30
+          resolvers:
+            - "1.1.1.1:53"
+            - "8.8.8.8:53"
+    logs:
+      access:
+        enabled: true
+    ingressRoute:
+      dashboard:
+        enabled: true
+        matchRule: Host(`traefik.yourdomain.org`)
+        entryPoints: ["websecure"]
+    env:
+      - name: DUCKDNS_TOKEN
+        valueFrom:
+          secretKeyRef:
+            key: apiKey
+            name: duckdns-api-credentials

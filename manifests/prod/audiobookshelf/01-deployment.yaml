@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audiobookshelf-deployment
+  namespace: app-audiobookshelf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: audiobookshelf
+  template:
+    metadata:
+      labels:
+        app: audiobookshelf
+    spec:
+      # securityContext:
+      #   runAsUser: 2000
+      #   runAsGroup: 2000
+      #   fsGroup: 2000
+      #   fsGroupChangePolicy: "Always"
+      containers:
+      - name: audiobookshelf
+        image: ghcr.io/advplyr/audiobookshelf:2.8.0
+        ports:
+          - containerPort: 80
+            protocol: TCP
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+        # env:
+        # - name: user
+        #   value: "2000:2000"
+        envFrom:
+        - configMapRef:
+            name: audiobookshelf-env-configmap
+        volumeMounts:
+        # Host timezone + localtime
+        - name: localtime
+          mountPath: /etc/localtime
+          readOnly: true
+        - name: timezone
+          mountPath: /etc/timezone
+          readOnly: true
+        # App specific mounts
+        - name: audiobookshelf-audiobooks
+          mountPath: /audiobooks
+        - name: audiobookshelf-podcasts
+          mountPath: /podcasts
+        # - name: audiobookshelf-media
+        #   mountPath: /media
+        - name: audiobookshelf-metadata
+          mountPath: /metadata
+        - name: audiobookshelf-config
+          mountPath: /config
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+          type: File
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+          type: File
+      # - name: audiobookshelf-media
+      #   hostPath:
+      #     path: /path/to/your/media-directory  # Adjust the path accordingly
+      - name: audiobookshelf-podcasts
+        hostPath:
+          path: /opt/other/audiobookshelf-podcasts  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      - name: audiobookshelf-audiobooks
+        hostPath:
+          path: /opt/other/audiobookshelf-audiobooks  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      - name: audiobookshelf-metadata
+        hostPath:
+          path: /opt/configs/audiobookshelf/metadata  # Adjust the path accordingly
+          type: DirectoryOrCreate
+      - name: audiobookshelf-config
+        hostPath:
+          path: /opt/configs/audiobookshelf/config  # Adjust the path accordingly
+          type: DirectoryOrCreate
+        # configMap:
+        #   name: audiobookshelf-config
+  # restartPolicy: Always

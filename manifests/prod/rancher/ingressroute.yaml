@@ -1,0 +1,62 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: rancher-dashboard
+  namespace: app-rancher
+  labels:
+    app.kubernetes.io/name: rancher-dashboard
+  annotations:
+    # https://gethomepage.dev/latest/configs/kubernetes/#traefik-ingressroute-support
+    # href is REALLY FUCKING REQUIRED HERE!!! Or won't work.
+    gethomepage.dev/href: "https://rancher.yourdomain.org"
+    gethomepage.dev/description: Dynamically Detected Homepage
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Next Group
+    gethomepage.dev/icon: rancher.png
+    gethomepage.dev/name: Rancher
+
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`rancher.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: rancher
+          port: 80
+
+# Untested
+# ---
+# apiVersion: traefik.containo.us/v1alpha1
+# kind: Middleware
+# metadata:
+#   name: redirect-middleware
+#   namespace: app-homepage
+# spec:
+#   redirectRegex:
+#     regex: "^https://yourdomain.org/(.*)"
+#     replacement: "https://home.yourdomain.org/$1"
+#     permanent: true
+
+# ---
+
+# apiVersion: traefik.containo.us/v1alpha1
+# kind: IngressRoute
+# metadata:
+#   name: redirect-ingressroute
+#   namespace: app-homepage
+# spec:
+#   entryPoints:
+#     - websecure
+#   routes:
+#     - match: Host(`yourdomain.org`)
+#       kind: Rule
+#       middlewares:
+#         - name: redirect-middleware
+#           namespace: app-homepage
+#       services:
+#         - name: homepage  # This service is a placeholder and will not be used for the redirect
+#           port: 3000

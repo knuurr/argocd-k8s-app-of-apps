@@ -1,0 +1,17 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: jellyfin-ingressroute
+  namespace: app-jellyfin
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`jellyfin.yourdomain.org`)
+      kind: Rule
+      middlewares:
+        - name: auth-middleware
+          namespace: kube-system
+      services:
+        - name: jellyfin-service
+          port: 80
