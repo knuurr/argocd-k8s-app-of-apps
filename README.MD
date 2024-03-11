@@ -1,9 +1,3 @@
----
-runme:
-  id: 01HRNK3JJYGASTTB9MCAHH164T
-  version: v3
----
-
 # Project Name
 
 ## Overview
